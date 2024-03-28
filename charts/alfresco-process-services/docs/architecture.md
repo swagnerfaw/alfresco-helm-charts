@@ -4,14 +4,25 @@ Below is a representation of a fully in-cluster Kuerbenetes deployment of APS.
 
 ```mermaid
 %%{init: {'theme':'neutral'}}%%
-flowchart LR
+flowchart TB
 
 classDef alf fill:#0b0,color:#fff
 classDef thrdP fill:#bb,color:#000
-classDef k8s fill:#326ce5,stroke:#326ce5,stroke-width:2px,color:#fff;
+classDef k8s fill:#326ce5,stroke:#326ce5,stroke-width:2px,color:#fff
 
-subgraph EKS
-    client[Client] -- "HTTP/S request /activiti-app" --> ingressAPS{{Ingress: release-name-ingress-aps}}
+subgraph legend
+  direction TB
+  a[Alfresco workloads]:::alf
+  t[Third party workloads]:::thrdP
+  k[Kubernetes resources]:::k8s
+end
+
+legend ~~~ client[Client]
+client -- "HTTP/S request /activiti-app" --> ingressAPS
+client -- "HTTP/S request /activiti-admin" --> ingressAdmin
+
+subgraph Kubernetes
+    ingressAPS{{Ingress: release-name-ingress-aps}}
     ingressAPS -- Routes request --> serviceAPS[Service: release-name-service-aps]
     serviceAPS -- Directs request --> deploymentAPS[Deployment: release-name-aps]
     deploymentAPS -- Runs on --> podAPS[Pod: release-name-aps]
@@ -20,7 +31,7 @@ subgraph EKS
     podAPS -- Connects to --> servicePostgres[Service: pg-postgresql-aps]
     servicePostgres -- Directs request --> statefulSetPostgres[StatefulSet: pg-postgresql-aps]
     statefulSetPostgres -- Runs on --> podPostgres[Pod: pg-postgresql-aps]
-    client -- "HTTP/S request /activiti-admin" --> ingressAdmin{{Ingress: release-name-ingress-admin}}
+    ingressAdmin{{Ingress: release-name-ingress-admin}}
     ingressAdmin -- Routes request --> serviceAdmin[Service: release-name-service-admin]
     serviceAdmin -- Directs request --> deploymentAdmin[Deployment: release-name-admin]
     deploymentAdmin -- Runs on --> podAdmin[Pod: release-name-admin]
@@ -33,12 +44,6 @@ subgraph EKS
     class ingressAdmin,serviceAdmin,configMapAdmin,secretAdmin,servicePostgres k8s
     class ingressAPS,serviceAPS,configMapAPS,secretAPS k8s
     class ingressAdmin,serviceAdmin,configMapAdmin,secretAdmin,servicePostgres k8s
-end
-
-subgraph Legend
-  a[Alfresco workloads]:::alf
-  t[Third party workloads]:::thrdP
-  k[Kubernetes resources]:::k8s
 end
 ```
 
@@ -61,7 +66,7 @@ subgraph legend
   k[Kubernetes resources]:::k8s
 end
 
-legend ~~~ client[Client]
+legend ~~~ client[Client]
 
 subgraph AWS public network
   ELB[Elastic Load Balancer]-- HTTP/S requests --> ingressAPS
