@@ -68,12 +68,6 @@ end
 
 legend ~~~ client[Client]
 
-subgraph AWS public network
-  ELB[Elastic Load Balancer]-- HTTP/S requests --> ingressAPS
-  ELB[Elastic Load Balancer]-- HTTP/S requests --> ingressAdmin
-  class ELB aws
-end
-
 subgraph EKS
   ingressAPS{{Ingress: release-name-ingress-aps}}
   ingressAdmin{{Ingress: release-name-ingress-admin}}
@@ -90,6 +84,12 @@ subgraph EKS
   class ingressAPS,serviceAPS,configMapAPS,secretAPS k8s
   class ingressAdmin,serviceAdmin,configMapAdmin,secretAdmin k8s
   class podAPS,podAdmin,deploymentAPS,deploymentAdmin alf
+end
+
+subgraph AWS public network
+  ELB[Elastic Load Balancer]-- HTTP/S requests --> ingressAPS
+  ELB[Elastic Load Balancer]-- HTTP/S requests --> ingressAdmin
+  class ELB aws
 end
 
 client -- "HTTP/S request /activiti-app" --> ELB
